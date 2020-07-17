@@ -5,7 +5,8 @@ import { globalStyles } from '../styles/global';
 export default function Home() {
     return (
         <View style={globalStyles.container}>
-            <Text> Home </Text>
+            <Text> Overview </Text>
+            <Text> You can expect your next period in... </Text>
         </View>
     )
 }
