@@ -1,18 +1,25 @@
 import { createStackNavigator } from 'react-navigation-stack';
-import Calendar from '../screens/calendar';
+import CalendarPage from '../screens/calendar';
+import Symptoms from '../screens/symptoms';
 import Header from '../shared/header';
 import React from 'react';
 
 
 const screens = {
     Calendar: {
-        screen: Calendar,
+        screen: CalendarPage,
         navigationOptions: ({ navigation }) => {
             return {
                 headerTitle: () => <Header navigation={navigation} title="Calendar"/>,
             }
         }
     },
+    Symptoms: {
+        screen: Symptoms,
+        navigationOptions: {
+            title: 'Symptoms',
+        }
+    }
 }
 
 const AboutStack = createStackNavigator(screens, {
