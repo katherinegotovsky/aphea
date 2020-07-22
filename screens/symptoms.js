@@ -2,36 +2,39 @@ import React, {useState} from 'react';
 import { StyleSheet, View, Text, Modal } from 'react-native';
 import { globalStyles } from '../styles/global';
 import SymptomForm from './symptomform';
+import { TextInput } from 'react-native-gesture-handler';
 
 
-export default function Symptoms({ navigation }) {
+export default function Symptoms({ navigation , day, month, year}) {
 
     const [modalOpen, setModalOpen] = useState(false);
+    const [symptoms, setSymptoms] = useState([]);
 
-    const[symptoms, setSymptoms] = useState([
-        { period:'', day: '', symptom: '', key: ''}
-    ]);
-
-    const addRecord = (symptom) => {
-        symptom.key = Math.random().toString();
-        setSymptoms((currentSymptoms) => {
-            return [symptom, ...currentSymptoms]
-        });
-        setModalOpen(false);
+    const date = (day, month, year) => {
+        var date_string = day.toString()+month.toString()+year.toString();
+        return parseInt(date_string);
     }
+
+
+    // const addRecord = (symptom) => {
+    //     symptom.key = Math.random().toString();
+    //     setSymptoms((currentSymptoms) => {
+    //         return [symptom, ...currentSymptoms]
+    //     });
+    //     setModalOpen(false);
+    // }
 
     return (
         <View style={globalStyles.container}>
-            <Text>{ navigation.getParam('day') } </Text>
-            <Text>{ navigation.getParam('month') } </Text>
-            <Text>{ navigation.getParam('year') } </Text>
+
 
         <Modal visible={modalOpen} animationType='slide'>
             <View style={styles.modalContent}>
                 <Text> Hello from the modal</Text>
                 <Text onPress={() => setModalOpen(false)}>Close </Text>
             </View>
-            <SymptomForm addRecord={ addRecord } navigation={ navigation }/>
+
+            <SymptomForm navigation={ navigation} date={date}/>
         </Modal>
 
         <Text onPress={() => setModalOpen(true)}>Edit </Text>
@@ -39,6 +42,8 @@ export default function Symptoms({ navigation }) {
         </View>
     )
 }
+
+
 
 const styles = StyleSheet.create({
     modalToggle: {
