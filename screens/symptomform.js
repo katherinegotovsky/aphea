@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Button, TouchableOpacity, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, Button, TouchableOpacity, Keyboard, ScrollView, DocumentSnapshot } from 'react-native';
 import { globalStyles } from '../styles/global';
+import { CheckBox } from 'react-native-elements';
 import { Formik } from 'formik';
-import { TextInput } from 'react-native-gesture-handler';
+import { TextInput, FlatList } from 'react-native-gesture-handler';
 import * as firebase from 'firebase';
 import "firebase/firestore";
 
@@ -11,140 +12,182 @@ export default function SymptomForm({ navigation, date } ) {
     const[symptoms, setSymptoms] = useState('');
     const[period, setPeriod] = useState('');
     const[period_day, setPeriodDay] = useState('');
+    // const[bloating, setBloating] = useState(false);
+    // const[cramps, setCramps] = useState(false);
+    // const[headache, setHeadache] = useState(false);
+    // const[acne, setAcne] = useState(false);
+    // const[backache, setBackache] = useState(false);
+    // const[nausea, setNausea] = useState(false);
+    // const[fatigue, setFatigue] = useState(false);
+    // const[cravings, setCravings] = useState(false);
+    // const[insomnia, setInsomnia] = useState(false);
+    // const[constipation, setConstipation] = useState(false);
+    // const[diarrhea, setDiarrhea] = useState(false);
 
     const day = navigation.getParam('day');
     const month = navigation.getParam('month');
     const year = navigation.getParam('year');
-
-
-    const userRef = firebase.firestore().collection('days')
+    const timestamp = firebase.firestore.FieldValue.serverTimestamp();
     const period_date = date(day, month, year);
 
-    const checkIfDateExists = (period_date) => {
-        var userRefs = firebase.firestore().collection('days')
-        var query = userRefs.where("period_date", "==", period_date);
+    const recordID = period_date.toString();
 
-        firebase.firestore().collection("days").where("period_date", "==", period_date)
-            .get()
-            .then(function(querySnapshot) {
-                querySnapshot.forEach(function(doc) {
-                // doc.data() is never undefined for query doc snapshots
-                alert(doc.id, " => ", doc.data());
-                return true;
-            });
-        })
-        .catch(function(error) {
-            alert("Error getting documents: ", error);
+    // display values that are in the database
+    const displayDatabaseValues = () => {
+        const recordRef = db.collection("days").doc(recordID)
+ 
+        recordRef.get()
+            .then((doc) => {
+            if (doc.exists) {
+                var db_data = doc.data(); // works fine
+                console.log(db_data);
+
+                var db_period_date = db_data.data.period_date; //undefined
+                console.log(db_period_date);
+                // setPeriodDate(db_period_date);
+
+            } else {
+                 // do nothing
+            }
         });
     }
 
-    const addData = () => {
-        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-        const data = {
-            period_date: period_date ,
-            symptoms: symptoms,
-            period: period,
-            period_day: period_day, 
-            timestamp: timestamp,
-        };
 
-        userRef
-        .add(data)
-        .then(_doc => {
+
+    const data = {
+        period_date: period_date ,
+        symptoms: symptoms,
+        period: period,
+        period_day: period_day, 
+        timestamp: timestamp,
+        // bloating: bloating,
+        // cramps: cramps
+    };
+
+    var db = firebase.firestore();
+
+    const updateDatabase = (period_date) => {
+
+        db.collection("days").doc(recordID).set({ data })
+        .then(function() {
+            console.log("Document successfully written!");
             setPeriodDay('')
             setSymptoms('')
             setPeriod('')
+            // setBloating(false)
+            // setCramps(false)
             Keyboard.dismiss()
         })
-
-        .catch((error) => {
-            alert(error)
+        .catch(function(error) {
+            console.error("Error writing document: ", error);
         });
-    }
+    }        
+
 
     const onAddButtonPress = () => {
-        if (!checkIfDateExists(period_date)) {
-            addData();
-        }     
-        else {
-            alert("nothing added");
-        } 
-        
+        displayDatabaseValues();
+        updateDatabase(period_date);
     }
 
 
     return (
-        <View style={globalStyles.container}>
-            <Text>{ period_date } </Text>
+        <ScrollView>
+            <View style={globalStyles.container}>
+                <Text>{ period_date } </Text>
 
-            <TextInput
-                    placeholder='Add new symptom'
-                    placeholderTextColor="#aaaaaa"
-                    value={symptoms}
-                    onChangeText={(text) => setSymptoms(text)}
-                    underlineColorAndroid="transparent"
-                    autoCapitalize="none"
-            />
+                <TextInput
+                        placeholder="Insert symptoms here"
+                        placeholderTextColor="#aaaaaa"
+                        value={symptoms}
+                        onChangeText={(text) => setSymptoms(text)}
+                        underlineColorAndroid="transparent"
+                        autoCapitalize="none"
+                />
 
-            <TextInput
-                    placeholder='Do you have your period?'
-                    placeholderTextColor="#aaaaaa"
-                    value={period}
-                    onChangeText={(text) => setPeriod(text)}
-                    underlineColorAndroid="transparent"
-                    autoCapitalize="none"
-            />
+                {/* <CheckBox 
+                    title='Bloated' 
+                    checked={bloating}
+                    onPress={() => bloating ? setBloating(false) : setBloating(true)}
+                />
 
-            <TextInput
-                    placeholder='What day of your period is it?'
-                    placeholderTextColor="#aaaaaa"
-                    value={period_day}
-                    onChangeText={(text) => setPeriodDay(text)}
-                    underlineColorAndroid="transparent"
-                    autoCapitalize="none"
-            />  
+                <CheckBox 
+                    title='Cramps' 
+                    checked={cramps}
+                    onPress={() => cramps ? setCramps(false) : setCramps(true)}
+                /> */}
 
-                <TouchableOpacity onPress={onAddButtonPress}>
-                    <Text>Add</Text>
-                </TouchableOpacity>
+{/* 
+                <CheckBox 
+                    title='Headache' 
+                    value={headache}
+                    checked={() => setHeadache(true)}
+                />
 
-            {/* <Formik
-                initialValues={{ symptoms: '', date: navigation.getParam('day'), day: '', period: ''}}
-                onSubmit={
-                    onAddButtonPress
-                   // actions.resetForm();
-                }
-            >
-                {(formikprops) => (
-                    <View>
-                        <TextInput
-                            multiline
-                            style={globalStyles.input}
-                            placeholder='Symptoms'
-                            onChangeText={formikprops.handleChange('symptoms')}
-                            value={formikprops.values.symptoms}
-                        />
+                <CheckBox 
+                    title='Acne' 
+                    value={acne}
+                    checked={() => setAcne(true)}
+                />
 
-                        <TextInput
-                            style={globalStyles.input}
-                            placeholder='Day'
-                            onChangeText={formikprops.handleChange('day')}
-                            value={formikprops.values.day}
-                            keyboardType='numeric'
-                        />  
+                <CheckBox 
+                    title='Backache' 
+                    value={backache}
+                    checked={() => setBackache(true)}
+                />
 
-                        <TextInput
-                            style={globalStyles.input}
-                            placeholder='Period'
-                            onChangeText={formikprops.handleChange('period')}
-                            value={formikprops.values.period}
-                        />  
+                <CheckBox 
+                    title='Nausea' 
+                    value={nausea}
+                    checked={() => setNausea(true)}
+                />
 
-                        <Button title='enter' color='pink' onPress={formikprops.handleSubmit} />
+                <CheckBox 
+                    title='Cravings' 
+                    value={cravings}
+                    checked={() => setCravings(true)}
+                />
 
-                    </View>
-                )}
-                </Formik> */}
-        </View>
+                <CheckBox 
+                    title='Insomnia' 
+                    value={insomnia}
+                    checked={() => setInsomnia(true)}
+                />
+
+                <CheckBox 
+                    title='Constipation' 
+                    value={constipation}
+                    checked={() => setConstipation(true)}
+                />
+
+                <CheckBox 
+                    title='Diarrhea' 
+                    value={diarrhea}
+                    checked={() => setDiarrhea(true)}
+                /> */}
+
+                <TextInput
+                        placeholder='Do you have your period?'
+                        placeholderTextColor="#aaaaaa"
+                        value={period}
+                        onChangeText={(text) => setPeriod(text)}
+                        underlineColorAndroid="transparent"
+                        autoCapitalize="none"
+                />
+
+                <TextInput
+                        placeholder='What day of your period is it?'
+                        placeholderTextColor="#aaaaaa"
+                        value={period_day}
+                        onChangeText={(text) => setPeriodDay(text)}
+                        underlineColorAndroid="transparent"
+                        autoCapitalize="none"
+                /> 
+
+                    <TouchableOpacity onPress={onAddButtonPress}>
+                        <Text>Add</Text>
+                    </TouchableOpacity>
+
+            </View>
+        </ScrollView>
     )
 }

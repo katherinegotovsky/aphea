@@ -24,7 +24,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const dbh = firebase.firestore();
+var db = firebase.firestore();
 
  // Get a reference to the database service
  var database = firebase.database();
