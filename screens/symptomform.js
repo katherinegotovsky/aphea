@@ -1,28 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Button, TouchableOpacity, Keyboard, ScrollView, DocumentSnapshot } from 'react-native';
 import { globalStyles } from '../styles/global';
 import { CheckBox } from 'react-native-elements';
-import { Formik } from 'formik';
 import { TextInput, FlatList } from 'react-native-gesture-handler';
 import * as firebase from 'firebase';
 import "firebase/firestore";
 
-export default function SymptomForm({ navigation, date } ) {
+export default function SymptomForm( { navigation, date } ) {
 
     const[symptoms, setSymptoms] = useState('');
     const[period, setPeriod] = useState('');
     const[period_day, setPeriodDay] = useState('');
-    // const[bloating, setBloating] = useState(false);
-    // const[cramps, setCramps] = useState(false);
-    // const[headache, setHeadache] = useState(false);
-    // const[acne, setAcne] = useState(false);
-    // const[backache, setBackache] = useState(false);
-    // const[nausea, setNausea] = useState(false);
-    // const[fatigue, setFatigue] = useState(false);
-    // const[cravings, setCravings] = useState(false);
-    // const[insomnia, setInsomnia] = useState(false);
-    // const[constipation, setConstipation] = useState(false);
-    // const[diarrhea, setDiarrhea] = useState(false);
+    const[bloating, setBloating] = useState(false);
+    const[cramps, setCramps] = useState(false);
+    const[headache, setHeadache] = useState(false);
+    const[acne, setAcne] = useState(true);
+    const[backache, setBackache] = useState(false);
+    const[nausea, setNausea] = useState(false);
+    const[fatigue, setFatigue] = useState(false);
+    const[cravings, setCravings] = useState(false);
+    const[insomnia, setInsomnia] = useState(false);
+    const[constipation, setConstipation] = useState(false);
+    const[diarrhea, setDiarrhea] = useState(false);
 
     const day = navigation.getParam('day');
     const month = navigation.getParam('month');
@@ -32,26 +31,32 @@ export default function SymptomForm({ navigation, date } ) {
 
     const recordID = period_date.toString();
 
+    var db = firebase.firestore();
+
+   
+
     // display values that are in the database
-    const displayDatabaseValues = () => {
+    // const displayDatabaseValues = () => {
         const recordRef = db.collection("days").doc(recordID)
  
-        recordRef.get()
-            .then((doc) => {
-            if (doc.exists) {
-                var db_data = doc.data(); // works fine
-                console.log(db_data);
+        
+            recordRef.get()
+                .then((doc) => {
+                if (doc.exists) {
+                    var db_data = doc.data(); 
+                    console.log(db_data);
 
-                var db_period_date = db_data.data.period_date; //undefined
-                console.log(db_period_date);
-                // setPeriodDate(db_period_date);
+                    var db_symptoms = db_data.data.symptoms; 
 
-            } else {
-                 // do nothing
-            }
-        });
-    }
+                    setSymptoms(db_symptoms);
+                
 
+                } else {
+                    // do nothing
+                }
+            });
+            
+    // }
 
 
     const data = {
@@ -60,20 +65,29 @@ export default function SymptomForm({ navigation, date } ) {
         period: period,
         period_day: period_day, 
         timestamp: timestamp,
-        // bloating: bloating,
-        // cramps: cramps
+        bloating: bloating,
+        cramps: cramps,
+        headache: headache,
+        acne: acne,
+        nausea: nausea,
+        fatigue: fatigue,
+        cravings: cravings,
+        insomnia: insomnia,
+        constipation: constipation,
+        diarrhea: diarrhea
+    
     };
 
-    var db = firebase.firestore();
+ 
 
     const updateDatabase = (period_date) => {
 
         db.collection("days").doc(recordID).set({ data })
         .then(function() {
             console.log("Document successfully written!");
-            setPeriodDay('')
-            setSymptoms('')
-            setPeriod('')
+            // setPeriodDay('')
+            // setSymptoms('')
+            // setPeriod('')
             // setBloating(false)
             // setCramps(false)
             Keyboard.dismiss()
@@ -83,9 +97,13 @@ export default function SymptomForm({ navigation, date } ) {
         });
     }        
 
+    // useEffect(() => {
+    //     displayDatabaseValues();
+    // });
+
 
     const onAddButtonPress = () => {
-        displayDatabaseValues();
+        
         updateDatabase(period_date);
     }
 
@@ -96,15 +114,15 @@ export default function SymptomForm({ navigation, date } ) {
                 <Text>{ period_date } </Text>
 
                 <TextInput
-                        placeholder="Insert symptoms here"
-                        placeholderTextColor="#aaaaaa"
-                        value={symptoms}
+                        // placeholder= { symptoms }
+                        // placeholderTextColor="#aaaaaa"
+                        value={ symptoms }
                         onChangeText={(text) => setSymptoms(text)}
                         underlineColorAndroid="transparent"
                         autoCapitalize="none"
                 />
 
-                {/* <CheckBox 
+                <CheckBox 
                     title='Bloated' 
                     checked={bloating}
                     onPress={() => bloating ? setBloating(false) : setBloating(true)}
@@ -114,55 +132,61 @@ export default function SymptomForm({ navigation, date } ) {
                     title='Cramps' 
                     checked={cramps}
                     onPress={() => cramps ? setCramps(false) : setCramps(true)}
-                /> */}
+                />
 
-{/* 
+
                 <CheckBox 
                     title='Headache' 
                     value={headache}
-                    checked={() => setHeadache(true)}
+                    onPress={() => bloating ? setHeadache(false) : setHeadache(true)}
                 />
 
                 <CheckBox 
                     title='Acne' 
                     value={acne}
-                    checked={() => setAcne(true)}
+                    onPress={() => bloating ? setAcne(false) : setAcne(true)}
                 />
 
                 <CheckBox 
                     title='Backache' 
                     value={backache}
-                    checked={() => setBackache(true)}
+                    onPress={() => bloating ? setBackache(false) : setBackache(true)}
                 />
 
                 <CheckBox 
                     title='Nausea' 
                     value={nausea}
-                    checked={() => setNausea(true)}
+                    onPress={() => bloating ? setNausea(false) : setNausea(true)}
+                />
+
+                <CheckBox 
+                    title='Fatigue' 
+                    value={fatigue}
+                    onPress={() => bloating ? setFatigue(false) : setFatigue(true)}
                 />
 
                 <CheckBox 
                     title='Cravings' 
                     value={cravings}
-                    checked={() => setCravings(true)}
+                    onPress={() => bloating ? setCravings(false) : setCravings(true)}
                 />
-
+{/* 
                 <CheckBox 
                     title='Insomnia' 
                     value={insomnia}
-                    checked={() => setInsomnia(true)}
+                    onPress={() => bloating ? setInsomnia(false) : setInsomnia(true)}
                 />
 
                 <CheckBox 
                     title='Constipation' 
                     value={constipation}
-                    checked={() => setConstipation(true)}
+                    onPress={() => bloating ? setConstipation(false) : setConstipation(true)}
                 />
 
                 <CheckBox 
                     title='Diarrhea' 
                     value={diarrhea}
-                    checked={() => setDiarrhea(true)}
+                    onPress={() => bloating ? setDiarrhea(false) : setDiarrhea(true)}
                 /> */}
 
                 <TextInput

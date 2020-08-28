@@ -19,9 +19,9 @@ export default function Header({ navigation, title }) {
 }
 
 const styles = StyleSheet.create({
-    header:{
+    header: {
         width: '100%',
-        height: '100%',
+        height: 'auto',
         flexDirection:'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -31,9 +31,11 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: '#333',
         letterSpacing: 1,
+
     },
     icon: {
         position: 'absolute',
-        left: 0
+        left: 0,
+
     }
 });
